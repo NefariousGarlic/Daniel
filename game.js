@@ -6,27 +6,49 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Load images
+// Load images with onload callbacks to ensure they are drawn after loading
 const characterNormal = new Image();
-characterNormal.src = 'danielbaldpants.png';
 const characterMouth = new Image();
-characterMouth.src = 'danielbaldmouth.png';
-
 const burgerImg = new Image();
-burgerImg.src = 'burger.png';
 const chickenWingImg = new Image();
-chickenWingImg.src = 'ChickenWing.png';
 const eggplantImg = new Image();
-eggplantImg.src = 'eggplant.png';
 const cucumberImg = new Image();
-cucumberImg.src = 'cumber.png';
 const chipImg = new Image();
+
+let imagesLoaded = 0;
+const totalImages = 7; // Number of images to load
+
+characterNormal.src = 'danielbaldpants.png';
+characterMouth.src = 'danielbaldmouth.png';
+burgerImg.src = 'burger.png';
+chickenWingImg.src = 'ChickenWing.png';
+eggplantImg.src = 'eggplant.png';
+cucumberImg.src = 'cumber.png';
 chipImg.src = 'chip.png';
 
+// List of food images
 const foodImages = [burgerImg, chickenWingImg, eggplantImg, cucumberImg, chipImg];
 
+// Load images and ensure the game starts when all images are loaded
+function imageLoaded() {
+    imagesLoaded++;
+    if (imagesLoaded === totalImages) {
+        // Start the game loop once all images are loaded
+        gameLoop();
+    }
+}
+
+// Attach load event listeners to ensure images are fully loaded
+characterNormal.onload = imageLoaded;
+characterMouth.onload = imageLoaded;
+burgerImg.onload = imageLoaded;
+chickenWingImg.onload = imageLoaded;
+eggplantImg.onload = imageLoaded;
+cucumberImg.onload = imageLoaded;
+chipImg.onload = imageLoaded;
+
 // Set up character attributes
-let characterSize = 200;
+let characterSize = 400;
 let characterX = canvas.width / 2 - characterSize / 2;
 let characterY = canvas.height - characterSize - 100;
 let characterSpeed = 10;
@@ -106,9 +128,6 @@ function gameLoop() {
     frames++;
     requestAnimationFrame(gameLoop);
 }
-
-// Start the game loop
-gameLoop();
 
 // Handle character movement with arrow keys
 window.addEventListener("keydown", (event) => {
