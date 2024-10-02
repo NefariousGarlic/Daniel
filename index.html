@@ -3,196 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food Catching Game</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: linear-gradient(135deg, #ff7e5f, #feb47b); /* Gradient background */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            position: relative;
-            color: #fff;
-            font-family: Arial, sans-serif;
-        }
-
-        #gameCanvas {
-            display: none; /* Hide the canvas initially */
-        }
-
-        #startButton {
-            padding: 15px 30px;
-            font-size: 24px;
-            color: white;
-            background-color: #ff6f61; /* Button color */
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        #startButton:hover {
-            background-color: #ff4f41; /* Darker button color on hover */
-        }
-
-        #gameContainer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        /* Circle effect on mouse move */
-        .circle {
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            transition: background 0.3s;
-        }
-    </style>
+    <title>Food Catcher Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="game.js" defer></script>
 </head>
 <body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas"></canvas>
+    <div class="container">
+        <h1>Food Catcher Game</h1>
+        <button id="playButton">Play</button>
     </div>
-    <button id="startButton">Play</button>
-    <div id="lightEffect" class="circle" style="width: 150px; height: 150px; background: rgba(255, 255, 255, 0.2);"></div>
-
+    <div id="gameContainer" class="hidden"></div>
     <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        const startButton = document.getElementById("startButton");
-        const lightEffect = document.getElementById("lightEffect");
+        const playButton = document.getElementById('playButton');
+        const gameContainer = document.getElementById('gameContainer');
 
-        // Set canvas dimensions
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        // Load images
-        const characterNormal = new Image();
-        characterNormal.src = 'danielbaldpants.png';
-        const characterMouth = new Image();
-        characterMouth.src = 'danielbaldmouth.png';
-
-        const foodImages = [
-            'burger.png',
-            'ChickenWing.png',
-            'eggplant.png',
-            'cumber.png',
-            'chip.png',
-        ].map(src => {
-            const img = new Image();
-            img.src = src;
-            return img;
+        playButton.addEventListener('click', () => {
+            gameContainer.classList.remove('hidden');
+            playButton.classList.add('hidden');
+            startGame(); // Function to start your game
         });
-
-        // Game variables
-        let characterX = canvas.width / 2 - 150;
-        let characterY = canvas.height - 200;
-        const characterSize = 300;
-        let foodList = [];
-        let score = 0;
-        let gameDuration = 60; // seconds
-        let startTime;
-
-        function resetGame() {
-            foodList = [];
-            score = 0;
-            characterX = canvas.width / 2 - characterSize / 2;
-            startTime = Date.now();
-        }
-
-        // Spawn food
-        function spawnFood() {
-            const foodX = Math.random() * (canvas.width - 100);
-            const foodImage = foodImages[Math.floor(Math.random() * foodImages.length)];
-            foodList.push({ x: foodX, y: 0, image: foodImage });
-        }
-
-        // Game loop
-        function gameLoop() {
-            const currentTime = Date.now();
-            const elapsed = (currentTime - startTime) / 1000;
-
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw character
-            const isFoodNearby = foodList.some(food => 
-                food.y + 100 > characterY && food.y < characterY + characterSize &&
-                food.x + 100 > characterX && food.x < characterX + characterSize
-            );
-
-            ctx.drawImage(isFoodNearby ? characterMouth : characterNormal, characterX, characterY, characterSize, characterSize);
-
-            // Draw food
-            for (let i = 0; i < foodList.length; i++) {
-                const food = foodList[i];
-                food.y += 5; // Fall speed
-                ctx.drawImage(food.image, food.x, food.y, 100, 100);
-
-                // Check for collision
-                if (food.y + 100 > characterY && food.y < characterY + characterSize &&
-                    food.x + 100 > characterX && food.x < characterX + characterSize) {
-                    foodList.splice(i, 1);
-                    score++;
-                    i--;
-                }
-
-                // Remove food if it falls off screen
-                if (food.y > canvas.height) {
-                    foodList.splice(i, 1);
-                    i--;
-                }
-            }
-
-            // Display score and timer
-            ctx.fillStyle = "#FFF";
-            ctx.font = "40px Arial";
-            ctx.fillText("Score: " + score, 20, 40);
-            ctx.fillText("Time Left: " + Math.max(0, Math.floor(gameDuration - elapsed)) + "s", 20, 80);
-
-            // Check if time is up
-            if (elapsed >= gameDuration) {
-                resetGame();
-            }
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Handle keyboard input
-        window.addEventListener('keydown', function(event) {
-            if (event.key === 'ArrowLeft' || event.key === 'a') {
-                characterX -= 10;
-                if (characterX < 0) characterX = 0;
-            } else if (event.key === 'ArrowRight' || event.key === 'd') {
-                characterX += 10;
-                if (characterX > canvas.width - characterSize) characterX = canvas.width - characterSize;
-            }
-        });
-
-        // Start game on button click
-        startButton.addEventListener('click', function() {
-            startButton.style.display = 'none'; // Hide button
-            canvas.style.display = 'block'; // Show canvas
-            resetGame();
-            gameLoop();
-            setInterval(spawnFood, 1000); // Spawn food every second
-        });
-
-        // Circle effect on mouse move
-        document.addEventListener('mousemove', function(event) {
-            lightEffect.style.left = event.clientX + 'px';
-            lightEffect.style.top = event.clientY + 'px';
-        });
-
-        // Initialize game
-        canvas.style.display = 'none'; // Hide canvas initially
     </script>
 </body>
 </html>
