@@ -8,18 +8,66 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #000;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b); /* Gradient background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+            color: #fff;
+            font-family: Arial, sans-serif;
         }
-        canvas {
-            display: block;
+
+        #gameCanvas {
+            display: none; /* Hide the canvas initially */
+        }
+
+        #startButton {
+            padding: 15px 30px;
+            font-size: 24px;
+            color: white;
+            background-color: #ff6f61; /* Button color */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #startButton:hover {
+            background-color: #ff4f41; /* Darker button color on hover */
+        }
+
+        #gameContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Circle effect on mouse move */
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: background 0.3s;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+    <button id="startButton">Play</button>
+    <div id="lightEffect" class="circle" style="width: 150px; height: 150px; background: rgba(255, 255, 255, 0.2);"></div>
+
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
+        const startButton = document.getElementById("startButton");
+        const lightEffect = document.getElementById("lightEffect");
 
         // Set canvas dimensions
         canvas.width = window.innerWidth;
@@ -50,7 +98,7 @@
         let foodList = [];
         let score = 0;
         let gameDuration = 60; // seconds
-        let startTime = Date.now();
+        let startTime;
 
         function resetGame() {
             foodList = [];
@@ -128,9 +176,23 @@
             }
         });
 
-        // Start game
-        setInterval(spawnFood, 1000); // Spawn food every second
-        gameLoop();
+        // Start game on button click
+        startButton.addEventListener('click', function() {
+            startButton.style.display = 'none'; // Hide button
+            canvas.style.display = 'block'; // Show canvas
+            resetGame();
+            gameLoop();
+            setInterval(spawnFood, 1000); // Spawn food every second
+        });
+
+        // Circle effect on mouse move
+        document.addEventListener('mousemove', function(event) {
+            lightEffect.style.left = event.clientX + 'px';
+            lightEffect.style.top = event.clientY + 'px';
+        });
+
+        // Initialize game
+        canvas.style.display = 'none'; // Hide canvas initially
     </script>
 </body>
 </html>
